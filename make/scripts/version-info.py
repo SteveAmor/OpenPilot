@@ -235,7 +235,7 @@ class Repo:
         with open(json_path, 'w') as json_file:
            json.dump(json_data, json_file)
 
-def file_from_template(tpl_name, out_name, dict):
+def file_from_template(tpl_name, out_name, dictionary):
     """Create or update file from template using dictionary
 
     This function reads the template, performs placeholder replacement
@@ -263,13 +263,19 @@ def file_from_template(tpl_name, out_name, dict):
         file_from_template(tpl_name, out_name, dictionary)
     """
 
+    # We need to escape the strings for C
+    escaped_dict = dict(dictionary)
+    for key in escaped_dict:
+        # Using json.dumps and removing the surounding quotes escapes for C
+        escaped_dict[key] = json.dumps(escaped_dict[key])[1:-1]
+
     # Read template first
     tf = open(tpl_name, "rb")
     tpl = tf.read()
     tf.close()
 
     # Replace placeholders using dictionary
-    out = Template(tpl).substitute(dict)
+    out = Template(tpl).substitute(escaped_dict)
 
     # Check if output file already exists
     try:
